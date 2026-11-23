@@ -1,8 +1,11 @@
+
 package com.rede.rede_restaurantes.controller;
 
 import com.rede.rede_restaurantes.entity.Unidade;
 import com.rede.rede_restaurantes.service.UnidadeService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,9 +29,7 @@ public class UnidadeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Unidade> buscarPorId(@PathVariable Long id) {
-        return unidadeService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(unidadeService.buscarPorId(id));
     }
 
     @PostMapping
@@ -43,22 +44,19 @@ public class UnidadeController {
             @PathVariable Long id,
             @Valid @RequestBody Unidade unidade) {
 
-        return unidadeService.buscarPorId(id)
-                .map(unidadeExistente -> {
-                    unidade.setId(id);
-                    return ResponseEntity.ok(unidadeService.salvar(unidade));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Unidade unidadeExistente = unidadeService.buscarPorId(id);
+
+        unidade.setId(unidadeExistente.getId());
+
+        return ResponseEntity.ok(unidadeService.salvar(unidade));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return unidadeService.buscarPorId(id)
-                .map(unidadeExistente -> {
-                    unidadeService.excluir(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+
+        unidadeService.excluir(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

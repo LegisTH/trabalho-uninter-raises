@@ -1,6 +1,7 @@
 
 package com.rede.rede_restaurantes.controller;
 
+import com.rede.rede_restaurantes.dto.SolicitarPagamento;
 import com.rede.rede_restaurantes.entity.Pagamento;
 import com.rede.rede_restaurantes.service.PagamentoService;
 
@@ -53,6 +54,15 @@ public class PagamentoController {
         return pagamentoService.listarPorStatus(status);
     }
 
+    @PostMapping("/solicitar")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Pagamento> solicitarPagamento(
+            @Valid @RequestBody SolicitarPagamento dados) {
+
+        return ResponseEntity.ok(
+                pagamentoService.solicitarPagamento(dados));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public Pagamento criar(@Valid @RequestBody Pagamento pagamento) {
@@ -63,9 +73,10 @@ public class PagamentoController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Pagamento> atualizar(
             @PathVariable Long id,
-            @Valid @RequestBody Pagamento pagamento) {
+            @RequestBody Pagamento pagamento) {
 
-        return ResponseEntity.ok(pagamentoService.atualizar(id, pagamento));
+        return ResponseEntity.ok(
+                pagamentoService.atualizar(id, pagamento));
     }
 
     @DeleteMapping("/{id}")

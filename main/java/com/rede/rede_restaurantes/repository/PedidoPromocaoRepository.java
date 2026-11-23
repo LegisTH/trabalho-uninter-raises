@@ -1,3 +1,4 @@
+
 package com.rede.rede_restaurantes.repository;
 
 import com.rede.rede_restaurantes.entity.PedidoPromocao;
@@ -10,4 +11,8 @@ public interface PedidoPromocaoRepository extends JpaRepository<PedidoPromocao, 
     List<PedidoPromocao> findByPedidoId(Long pedidoId);
 
     List<PedidoPromocao> findByPromocaoId(Long promocaoId);
+
+    boolean existsByPedidoIdAndPromocaoId(Long pedidoId, Long promocaoId);
+
+    boolean existsByPromocaoId(Long promocaoId);
 }

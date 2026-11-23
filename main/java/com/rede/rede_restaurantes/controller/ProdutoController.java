@@ -1,3 +1,4 @@
+
 package com.rede.rede_restaurantes.controller;
 
 import com.rede.rede_restaurantes.entity.Produto;
@@ -6,6 +7,7 @@ import com.rede.rede_restaurantes.service.ProdutoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -26,9 +28,7 @@ public class ProdutoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
-        return produtoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(produtoService.buscarPorId(id));
     }
 
     @GetMapping("/buscar")
@@ -48,22 +48,16 @@ public class ProdutoController {
             @PathVariable Long id,
             @Valid @RequestBody Produto produto) {
 
-        return produtoService.buscarPorId(id)
-                .map(produtoExistente -> {
-                    produto.setId(id);
-                    return ResponseEntity.ok(produtoService.salvar(produto));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Produto produtoExistente = produtoService.buscarPorId(id);
+        produto.setId(produtoExistente.getId());
+
+        return ResponseEntity.ok(produtoService.salvar(produto));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return produtoService.buscarPorId(id)
-                .map(produtoExistente -> {
-                    produtoService.excluir(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        produtoService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,4 +1,3 @@
-
 package com.rede.rede_restaurantes.repository;
 
 import com.rede.rede_restaurantes.entity.Pagamento;
@@ -12,6 +11,8 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
     List<Pagamento> findByPedidoId(Long pedidoId);
 
     Optional<Pagamento> findByIdentificadorExterno(String identificadorExterno);
+
+    Optional<Pagamento> findByChaveIdempotencia(String chaveIdempotencia);
 
     List<Pagamento> findByStatus(String status);
 

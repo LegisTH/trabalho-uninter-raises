@@ -3,6 +3,7 @@ package com.rede.rede_restaurantes.repository;
 
 import com.rede.rede_restaurantes.entity.UsuarioPapel;
 import com.rede.rede_restaurantes.entity.UsuarioPapelId;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 
@@ -13,4 +14,11 @@ public interface UsuarioPapelRepository
 
     @EntityGraph(attributePaths = "papel")
     List<UsuarioPapel> findByUsuarioEmail(String email);
+
+    @EntityGraph(attributePaths = {"usuario", "papel"})
+    List<UsuarioPapel> findByUsuario_Id(Long usuarioId);
+
+    boolean existsByPapel_Id(Long papelId);
+
+    boolean existsByUsuario_IdAndPapel_Id(Long usuarioId, Long papelId);
 }

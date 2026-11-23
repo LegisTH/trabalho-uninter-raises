@@ -3,6 +3,7 @@ package com.rede.rede_restaurantes.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,8 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "categoria_id")
+    @NotNull(message = "A categoria do produto é obrigatória")
+    @Column(name = "categoria_id", nullable = false)
     private Long categoriaId;
 
     @NotBlank(message = "O nome do produto é obrigatório")
@@ -27,6 +29,7 @@ public class Produto {
 
     private String descricao;
 
+    @NotNull(message = "O status do produto é obrigatório")
     @Column(nullable = false)
     private Boolean ativo = true;
 }

@@ -1,11 +1,15 @@
+
 package com.rede.rede_restaurantes.controller;
 
 import com.rede.rede_restaurantes.entity.MovimentacaoPontuacao;
 import com.rede.rede_restaurantes.service.MovimentacaoPontuacaoService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -16,6 +20,7 @@ public class MovimentacaoPontuacaoController {
 
     public MovimentacaoPontuacaoController(
             MovimentacaoPontuacaoService movimentacaoPontuacaoService) {
+
         this.movimentacaoPontuacaoService = movimentacaoPontuacaoService;
     }
 
@@ -25,7 +30,9 @@ public class MovimentacaoPontuacaoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MovimentacaoPontuacao> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<MovimentacaoPontuacao> buscarPorId(
+            @PathVariable Long id) {
+
         return movimentacaoPontuacaoService.buscarPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -34,11 +41,14 @@ public class MovimentacaoPontuacaoController {
     @GetMapping("/carteira/{carteiraId}")
     public List<MovimentacaoPontuacao> listarPorCarteira(
             @PathVariable Long carteiraId) {
+
         return movimentacaoPontuacaoService.listarPorCarteira(carteiraId);
     }
 
     @GetMapping("/pedido/{pedidoId}")
-    public List<MovimentacaoPontuacao> listarPorPedido(@PathVariable Long pedidoId) {
+    public List<MovimentacaoPontuacao> listarPorPedido(
+            @PathVariable Long pedidoId) {
+
         return movimentacaoPontuacaoService.listarPorPedido(pedidoId);
     }
 
@@ -46,32 +56,16 @@ public class MovimentacaoPontuacaoController {
     @PreAuthorize("hasRole('ADMIN')")
     public MovimentacaoPontuacao criar(
             @Valid @RequestBody MovimentacaoPontuacao movimentacao) {
+
         return movimentacaoPontuacaoService.salvar(movimentacao);
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<MovimentacaoPontuacao> atualizar(
-            @PathVariable Long id,
-            @Valid @RequestBody MovimentacaoPontuacao movimentacao) {
-
-        return movimentacaoPontuacaoService.buscarPorId(id)
-                .map(movimentacaoExistente -> {
-                    movimentacao.setId(id);
-                    return ResponseEntity.ok(
-                            movimentacaoPontuacaoService.salvar(movimentacao));
-                })
-                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return movimentacaoPontuacaoService.buscarPorId(id)
-                .map(movimentacaoExistente -> {
-                    movimentacaoPontuacaoService.excluir(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+
+        movimentacaoPontuacaoService.excluir(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

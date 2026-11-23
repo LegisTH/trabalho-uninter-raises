@@ -1,12 +1,15 @@
-
 package com.rede.rede_restaurantes.service;
 
 import com.rede.rede_restaurantes.entity.MovimentacaoEstoque;
 import com.rede.rede_restaurantes.entity.Estoque;
+import com.rede.rede_restaurantes.entity.ItemPedido;
+import com.rede.rede_restaurantes.entity.Pedido;
 
 import com.rede.rede_restaurantes.repository.MovimentacaoEstoqueRepository;
 import com.rede.rede_restaurantes.repository.EstoqueRepository;
 import com.rede.rede_restaurantes.repository.UsuarioRepository;
+import com.rede.rede_restaurantes.repository.ItemPedidoRepository;
+import com.rede.rede_restaurantes.repository.PedidoRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -24,15 +27,21 @@ public class MovimentacaoEstoqueService {
     private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
     private final EstoqueRepository estoqueRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ItemPedidoRepository itemPedidoRepository;
+    private final PedidoRepository pedidoRepository;
 
     public MovimentacaoEstoqueService(
             MovimentacaoEstoqueRepository movimentacaoEstoqueRepository,
             EstoqueRepository estoqueRepository,
-            UsuarioRepository usuarioRepository) {
+            UsuarioRepository usuarioRepository,
+            ItemPedidoRepository itemPedidoRepository,
+            PedidoRepository pedidoRepository) {
 
         this.movimentacaoEstoqueRepository = movimentacaoEstoqueRepository;
         this.estoqueRepository = estoqueRepository;
         this.usuarioRepository = usuarioRepository;
+        this.itemPedidoRepository = itemPedidoRepository;
+        this.pedidoRepository = pedidoRepository;
     }
 
     public List<MovimentacaoEstoque> listarTodos() {
@@ -105,6 +114,57 @@ public class MovimentacaoEstoqueService {
         estoqueRepository.save(estoque);
 
         return movimentacaoEstoqueRepository.save(movimentacao);
+    }
+
+    @Transactional
+    @PreAuthorize("isAuthenticated()")
+    public void registrarSaidaPorPagamento(Long pedidoId, Long usuarioId) {
+
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("Pedido não encontrado"));
+
+        if (!pedido.getUsuarioId().equals(usuarioId)) {
+            throw new IllegalArgumentException(
+                    "O usuário não corresponde ao pedido");
+        }
+
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new EntityNotFoundException("Usuário não encontrado");
+        }
+
+        List<ItemPedido> itens = itemPedidoRepository.findByPedidoId(pedidoId);
+
+        for (ItemPedido item : itens) {
+
+            Estoque estoque = estoqueRepository
+                    .findByProdutoUnidadeId(item.getProdutoUnidadeId())
+                    .orElseThrow(() ->
+                            new EntityNotFoundException(
+                                    "Estoque do produto não encontrado"));
+
+            if (estoque.getQuantidadeAtual() < item.getQuantidade()) {
+                throw new IllegalArgumentException(
+                        "Estoque insuficiente para o produto da unidade "
+                                + item.getProdutoUnidadeId());
+            }
+
+            estoque.setQuantidadeAtual(
+                    estoque.getQuantidadeAtual() - item.getQuantidade());
+
+            estoqueRepository.save(estoque);
+
+            MovimentacaoEstoque movimentacao = new MovimentacaoEstoque();
+
+            movimentacao.setEstoqueId(estoque.getId());
+            movimentacao.setUsuarioId(usuarioId);
+            movimentacao.setTipo("SAIDA");
+            movimentacao.setQuantidade(item.getQuantidade());
+            movimentacao.setMotivo(
+                    "Saída referente ao pagamento aprovado do pedido " + pedidoId);
+
+            movimentacaoEstoqueRepository.save(movimentacao);
+        }
     }
 
     public void excluir(Long id) {

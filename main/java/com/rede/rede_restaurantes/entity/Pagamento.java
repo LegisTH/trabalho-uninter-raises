@@ -5,11 +5,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMin;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -30,6 +33,9 @@ public class Pagamento {
 
     @Column(name = "identificador_externo")
     private String identificadorExterno;
+
+    @Column(name = "chave_idempotencia", unique = true)
+    private String chaveIdempotencia;
 
     @NotBlank(message = "O método de pagamento é obrigatório")
     @Column(name = "metodo_pagamento", nullable = false)
@@ -63,6 +69,7 @@ public class Pagamento {
         if (feitoEm == null) {
             feitoEm = LocalDateTime.now();
         }
+
         atualizadoEm = LocalDateTime.now();
     }
 

@@ -1,11 +1,15 @@
+
 package com.rede.rede_restaurantes.controller;
 
 import com.rede.rede_restaurantes.entity.PedidoPromocao;
 import com.rede.rede_restaurantes.service.PedidoPromocaoService;
+
 import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.List;
 
 @RestController
@@ -42,32 +46,20 @@ public class PedidoPromocaoController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public PedidoPromocao criar(@Valid @RequestBody PedidoPromocao pedidoPromocao) {
-        return pedidoPromocaoService.salvar(pedidoPromocao);
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PedidoPromocao> atualizar(
-            @PathVariable Long id,
+    public PedidoPromocao criar(
             @Valid @RequestBody PedidoPromocao pedidoPromocao) {
 
-        return pedidoPromocaoService.buscarPorId(id)
-                .map(pedidoPromocaoExistente -> {
-                    pedidoPromocao.setId(id);
-                    return ResponseEntity.ok(pedidoPromocaoService.salvar(pedidoPromocao));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        pedidoPromocao.setId(null);
+
+        return pedidoPromocaoService.salvar(pedidoPromocao);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return pedidoPromocaoService.buscarPorId(id)
-                .map(pedidoPromocaoExistente -> {
-                    pedidoPromocaoService.excluir(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+
+        pedidoPromocaoService.excluir(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

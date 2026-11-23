@@ -1,3 +1,4 @@
+
 package com.rede.rede_restaurantes.repository;
 
 import com.rede.rede_restaurantes.entity.Pedido;
@@ -12,4 +13,6 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByUnidadeId(Long unidadeId);
 
     List<Pedido> findByStatus(String status);
+
+    List<Pedido> findByCanalPedido(String canalPedido);
 }

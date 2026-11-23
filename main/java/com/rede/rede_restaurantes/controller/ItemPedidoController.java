@@ -1,11 +1,13 @@
+
 package com.rede.rede_restaurantes.controller;
 
 import com.rede.rede_restaurantes.entity.ItemPedido;
 import com.rede.rede_restaurantes.service.ItemPedidoService;
-import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -38,11 +40,13 @@ public class ItemPedidoController {
     @GetMapping("/produto-unidade/{produtoUnidadeId}")
     public List<ItemPedido> listarPorProdutoUnidade(
             @PathVariable Long produtoUnidadeId) {
+
         return itemPedidoService.listarPorProdutoUnidade(produtoUnidadeId);
     }
 
     @PostMapping
-    public ItemPedido criar(@Valid @RequestBody ItemPedido itemPedido) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ItemPedido criar(@RequestBody ItemPedido itemPedido) {
         return itemPedidoService.salvar(itemPedido);
     }
 
@@ -50,12 +54,13 @@ public class ItemPedidoController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ItemPedido> atualizar(
             @PathVariable Long id,
-            @Valid @RequestBody ItemPedido itemPedido) {
+            @RequestBody ItemPedido itemPedido) {
 
         return itemPedidoService.buscarPorId(id)
                 .map(itemExistente -> {
                     itemPedido.setId(id);
-                    return ResponseEntity.ok(itemPedidoService.salvar(itemPedido));
+                    return ResponseEntity.ok(
+                            itemPedidoService.salvar(itemPedido));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -63,11 +68,13 @@ public class ItemPedidoController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return itemPedidoService.buscarPorId(id)
-                .map(itemExistente -> {
-                    itemPedidoService.excluir(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+
+        if (itemPedidoService.buscarPorId(id).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        itemPedidoService.excluir(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

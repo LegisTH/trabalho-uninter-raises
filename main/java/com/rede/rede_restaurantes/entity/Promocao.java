@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.AssertTrue;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -47,6 +48,21 @@ public class Promocao {
     @Column(name = "data_fim", nullable = false)
     private LocalDateTime dataFim;
 
+    @NotNull(message = "O campo ativo é obrigatório")
     @Column(nullable = false)
     private Boolean ativo = true;
+
+    @AssertTrue(message = "O tipo de desconto deve ser PERCENTUAL ou FIXO")
+    public boolean isTipoDescontoValido() {
+        return tipoDesconto == null
+                || tipoDesconto.equals("PERCENTUAL")
+                || tipoDesconto.equals("FIXO");
+    }
+
+    @AssertTrue(message = "A data de fim deve ser posterior à data de início")
+    public boolean isPeriodoValido() {
+        return dataInicio == null
+                || dataFim == null
+                || dataFim.isAfter(dataInicio);
+    }
 }

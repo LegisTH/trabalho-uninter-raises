@@ -1,14 +1,15 @@
 
 package com.rede.rede_restaurantes.controller;
 
+import com.rede.rede_restaurantes.dto.CriarPedido;
 import com.rede.rede_restaurantes.entity.Pedido;
 import com.rede.rede_restaurantes.service.PedidoService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,15 +24,19 @@ public class PedidoController {
     }
 
     @GetMapping
-    public List<Pedido> listarTodos() {
+    public List<Pedido> listarTodos(
+            @RequestParam(required = false) String canalPedido) {
+
+        if (canalPedido != null && !canalPedido.isBlank()) {
+            return pedidoService.listarPorCanal(canalPedido);
+        }
+
         return pedidoService.listarTodos();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Pedido> buscarPorId(@PathVariable Long id) {
-        return pedidoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(pedidoService.buscarPorId(id));
     }
 
     @GetMapping("/usuario/{usuarioId}")
@@ -50,7 +55,7 @@ public class PedidoController {
     }
 
     @PostMapping
-    public Pedido criar(@Valid @RequestBody Pedido pedido) {
+    public Pedido criar(@Valid @RequestBody CriarPedido pedido) {
         return pedidoService.salvar(pedido);
     }
 
@@ -58,7 +63,7 @@ public class PedidoController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Pedido> atualizar(
             @PathVariable Long id,
-            @Valid @RequestBody Pedido pedido) {
+            @RequestBody Pedido pedido) {
 
         return ResponseEntity.ok(pedidoService.atualizar(id, pedido));
     }
@@ -66,11 +71,7 @@ public class PedidoController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return pedidoService.buscarPorId(id)
-                .map(pedidoExistente -> {
-                    pedidoService.excluir(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        pedidoService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

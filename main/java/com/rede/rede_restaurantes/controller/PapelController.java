@@ -1,7 +1,11 @@
+
 package com.rede.rede_restaurantes.controller;
 
 import com.rede.rede_restaurantes.entity.Papel;
 import com.rede.rede_restaurantes.service.PapelService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +19,6 @@ public class PapelController {
 
     private final PapelService papelService;
 
-    
     public PapelController(PapelService papelService) {
         this.papelService = papelService;
     }
@@ -33,14 +36,14 @@ public class PapelController {
     }
 
     @PostMapping
-    public Papel criar(@RequestBody Papel papel) {
+    public Papel criar(@Valid @RequestBody Papel papel) {
         return papelService.salvar(papel);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Papel> atualizar(
             @PathVariable Long id,
-            @RequestBody Papel papel) {
+            @Valid @RequestBody Papel papel) {
 
         return papelService.buscarPorId(id)
                 .map(papelExistente -> {
@@ -52,11 +55,7 @@ public class PapelController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return papelService.buscarPorId(id)
-                .map(papelExistente -> {
-                    papelService.excluir(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        papelService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

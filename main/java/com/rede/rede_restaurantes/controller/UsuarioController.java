@@ -1,3 +1,4 @@
+
 package com.rede.rede_restaurantes.controller;
 
 import com.rede.rede_restaurantes.entity.Usuario;
@@ -6,6 +7,8 @@ import com.rede.rede_restaurantes.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -32,18 +35,18 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public Usuario criar(@RequestBody Usuario usuario) {
+    public Usuario criar(@Valid @RequestBody Usuario usuario) {
         return usuarioService.salvar(usuario);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Usuario> atualizar(
             @PathVariable Long id,
-            @RequestBody Usuario usuario) {
+            @Valid @RequestBody Usuario usuario) {
 
         return usuarioService.buscarPorId(id)
                 .map(usuarioExistente -> {
-                    usuario.setId(id);
+                    usuario.setId(usuarioExistente.getId());
                     return ResponseEntity.ok(usuarioService.salvar(usuario));
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -51,11 +54,9 @@ public class UsuarioController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        return usuarioService.buscarPorId(id)
-                .map(usuario -> {
-                    usuarioService.excluir(id);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+
+        usuarioService.excluir(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
